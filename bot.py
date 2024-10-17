@@ -102,8 +102,20 @@ async def start_bot():
     """Запуск диспетчера и основной функции параллельно."""
     await dp.start_polling(bot)
 
+def setup_and_run_loop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        loop.create_task(start_bot())
+        loop.create_task(main())
+        loop.run_forever()
+    except KeyboardInterrupt:
+        logger.info("Получен сигнал прерывания (Ctrl+C). Завершение работы.")
+    finally:
+        loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.close()
+        logger.info("Цикл событий завершен.")
+
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(start_bot())
-    loop.create_task(main())
-    loop.run_forever()
+    setup_and_run_loop()
